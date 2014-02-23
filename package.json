@@ -1,0 +1,19 @@
+{
+  "name": "recyclist",
+  "description": "Recyclist is a small javascript library for efficient scrolling of lists. Recyclist works by recycling nodes which are off the viewport and re-positioning them with absolute coordinates to avoid reflows.",
+  "author": {
+    "name": "Kevin Grandon, Robert O'Callahan"
+  },
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KevinGrandon/recyclist.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KevinGrandon/recyclist/issues"
+  },
+  "devDependencies": {
+    "nodeunit": "*"
+  },
+  "homepage": "https://github.com/KevinGrandon/recyclist"
+}
