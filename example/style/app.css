@@ -1,0 +1,32 @@
+body, html {
+	padding: 0;
+	margin: 0;
+	font-size: 10px;
+	height: 100%;
+	background: #FFF;
+}
+
+.item {
+  width: 100%;
+  padding: 2rem;
+  -moz-box-sizing: border-box;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.name {
+  font-size: 2rem;
+  font-weight: bold;
+  white-space: pre;
+}
+
+.number {
+  font-size: 16px;
+  white-space: pre;
+}
+
+.image {
+  width: 3.2rem;
+  height: 3.2rem;
+}
