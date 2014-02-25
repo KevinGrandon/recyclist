@@ -30,8 +30,8 @@ function Recyclist(config) {
     this[i] = config[i];
   }
 
-  this.syncBufferMultiplier = config.syncBufferMultiplier || 1;
-  this.bufferMultiplier = config.bufferMultiplier || 8;
+  this.visibleMultiplier = this.visibleMultiplier || 1;
+  this.asyncMultiplier = this.asyncMultiplier || 4;
 }
 
 Recyclist.prototype = {
@@ -41,6 +41,8 @@ Recyclist.prototype = {
    * @type {Array}
    */
   domItems: [],
+
+  lastScrollPos: 0,
 
   /**
    * Initializes recyclist, adds listeners, and renders items.
@@ -52,8 +54,6 @@ Recyclist.prototype = {
     this.scrollParent.addEventListener('scroll', this);
     this.scrollParent.addEventListener('resize', this);
 
-    this.lastScrollPos = this.getScrollPos();
-
     this.fix();
   },
 
@@ -62,7 +62,7 @@ Recyclist.prototype = {
    * If you only wanted to render what's on screen, you would just pass 1.
    * @param {Integer} multiplier A multiplier of the display port size.
    */
-  generate: function(multiplier, recycleMultiplier) {
+  generate: function(multiplier) {
     var itemHeight = this.itemHeight;
     var scrollPos = this.getScrollPos();
     var scrollPortHeight = this.getScrollHeight();
@@ -81,62 +81,47 @@ Recyclist.prototype = {
       Math.ceil((scrollPos + scrollPortHeight + displayPortMargin) /
         itemHeight));
 
-    var recycleDisplayPortMargin = recycleMultiplier * scrollPortHeight;
-    var recycleStartIndex = Math.max(0,
-      Math.floor((scrollPos - recycleDisplayPortMargin) / itemHeight));
-
-    var recycleEndIndex = Math.min(this.numItems,
-      Math.ceil((scrollPos + scrollPortHeight + recycleDisplayPortMargin) /
-        itemHeight));
-
     // indices of items which are eligible for recycling
     var recyclableItems = [];
     for (var i in this.domItems) {
-      if (i < recycleStartIndex || i >= recycleEndIndex) {
+      if (i < startIndex || i >= endIndex) {
         this.forget(this.domItems[i], i);
         recyclableItems.push(i);
       }
     }
 
-    // Put the items that are furthest away from the displayport at the end of
-    // the array.
-    function distanceFromDisplayPort(i) {
-      return i < startIndex ? startIndex - 1 - i : i - endIndex;
-    }
+    recyclableItems.sort();
 
-    recyclableItems.sort(function (a,b) {
-      return distanceFromDisplayPort(a) - distanceFromDisplayPort(b);
-    });
-
-    if (scrollPos < this.lastScrollPos) {
-      for (i = endIndex - 1; i >= startIndex; --i) {
-        this.populateIndex(i, recyclableItems);
+    for (i = startIndex; i < endIndex; ++i) {
+      if (this.domItems[i]) {
+        continue;
       }
-    } else {
-      for (i = startIndex; i < endIndex; ++i) {
-        this.populateIndex(i, recyclableItems);
+      var item;
+      if (recyclableItems.length > 0) {
+        var recycleIndex;
+        // Delete the item furthest from the direction we're scrolling toward
+        if (scrollPos >= this.lastScrollPos) {
+          recycleIndex = recyclableItems.shift();
+        } else {
+          recycleIndex = recyclableItems.pop();
+        }
+
+        item = this.domItems[recycleIndex];
+        delete this.domItems[recycleIndex];
+
+        // NOTE: We must detach and reattach the node even though we are
+        //       essentially just repositioning it.  This avoid pathological
+        //       layerization behavior where each item gets assigned its own
+        //       layer.
+        this.scrollChild.removeChild(item);
+      } else {
+        item = this.template.cloneNode(true);
       }
-    }
-
-    this.lastScrollPos = scrollPos;
-  },
-
-  populateIndex: function(i, recyclableItems) {
-    if (this.domItems[i]) {
-      return;
-    }
-    var item;
-    if (recyclableItems.length > 0) {
-      var recycleIndex = recyclableItems.pop();
-      item = this.domItems[recycleIndex];
-      delete this.domItems[recycleIndex];
-    } else {
-      item = this.template.cloneNode(true);
+      this.populate(item, i);
+      item.style.top = i * itemHeight + 'px';
+      this.domItems[i] = item;
       this.scrollChild.appendChild(item);
     }
-    this.populate(item, i);
-    item.style.top = i * this.itemHeight + 'px';
-    this.domItems[i] = item;
   },
 
   /**
@@ -145,11 +130,13 @@ Recyclist.prototype = {
    */
   fix: function() {
     // Synchronously generate all items that are immediately or nearly visible
-    this.generate(this.syncBufferMultiplier, this.bufferMultiplier);
+    this.generate(this.visibleMultiplier);
 
     // Asynchronously generate the other items for the displayport
-    setTimeout(this.generate.bind(this, this.bufferMultiplier,
-                                        this.bufferMultiplier));
+    setTimeout(function() {
+      this.generate(this.asyncMultiplier);
+      this.lastScrollPos = this.getScrollPos();
+    }.bind(this));
   },
 
   handleEvent: function() {
