@@ -30,7 +30,8 @@ function Recyclist(config) {
     this[i] = config[i];
   }
 
-  this.bufferMultiplier = this.bufferMultiplier || 8;
+  this.visibleMultiplier = this.visibleMultiplier || 1;
+  this.asyncMultiplier = this.asyncMultiplier || 4;
 }
 
 Recyclist.prototype = {
@@ -40,6 +41,8 @@ Recyclist.prototype = {
    * @type {Array}
    */
   domItems: [],
+
+  lastScrollPos: 0,
 
   /**
    * Initializes recyclist, adds listeners, and renders items.
@@ -82,19 +85,12 @@ Recyclist.prototype = {
     var recyclableItems = [];
     for (var i in this.domItems) {
       if (i < startIndex || i >= endIndex) {
+        this.forget(this.domItems[i], i);
         recyclableItems.push(i);
       }
     }
 
-    // Put the items that are furthest away from the displayport at the end of
-    // the array.
-    function distanceFromDisplayPort(i) {
-      return i < startIndex ? startIndex - 1 - i : i - endIndex;
-    }
-
-    recyclableItems.sort(function (a,b) {
-      return distanceFromDisplayPort(a) - distanceFromDisplayPort(b);
-    });
+    recyclableItems.sort();
 
     for (i = startIndex; i < endIndex; ++i) {
       if (this.domItems[i]) {
@@ -102,16 +98,29 @@ Recyclist.prototype = {
       }
       var item;
       if (recyclableItems.length > 0) {
-        var recycleIndex = recyclableItems.pop();
+        var recycleIndex;
+        // Delete the item furthest from the direction we're scrolling toward
+        if (scrollPos >= this.lastScrollPos) {
+          recycleIndex = recyclableItems.shift();
+        } else {
+          recycleIndex = recyclableItems.pop();
+        }
+
         item = this.domItems[recycleIndex];
         delete this.domItems[recycleIndex];
+
+        // NOTE: We must detach and reattach the node even though we are
+        //       essentially just repositioning it.  This avoid pathological
+        //       layerization behavior where each item gets assigned its own
+        //       layer.
+        this.scrollChild.removeChild(item);
       } else {
         item = this.template.cloneNode(true);
-        this.scrollChild.appendChild(item);
       }
       this.populate(item, i);
       item.style.top = i * itemHeight + 'px';
       this.domItems[i] = item;
+      this.scrollChild.appendChild(item);
     }
   },
 
@@ -121,10 +130,13 @@ Recyclist.prototype = {
    */
   fix: function() {
     // Synchronously generate all items that are immediately or nearly visible
-    this.generate(1);
+    this.generate(this.visibleMultiplier);
 
     // Asynchronously generate the other items for the displayport
-    setTimeout(this.generate.bind(this, this.bufferMultiplier));
+    setTimeout(function() {
+      this.generate(this.asyncMultiplier);
+      this.lastScrollPos = this.getScrollPos();
+    }.bind(this));
   },
 
   handleEvent: function() {
