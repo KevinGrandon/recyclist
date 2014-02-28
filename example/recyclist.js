@@ -38,7 +38,7 @@ Recyclist.prototype = {
 
   /**
    * Indexed by item number, the item elements currently in the DOM.
-   * @type {Array}
+   * @type {Object}
    */
   domItems: {},
 
@@ -53,6 +53,9 @@ Recyclist.prototype = {
 
     this.scrollParent.addEventListener('scroll', this);
     this.scrollParent.addEventListener('resize', this);
+
+    // Synchronously generate all items that are immediately or nearly visible
+    this.generate(this.visibleMultiplier);
 
     this.fix();
   },
@@ -131,14 +134,9 @@ Recyclist.prototype = {
   },
 
   /**
-   * Immediately renders items within the display port.
-   * Also generates items outside the display port on next tick.
+   * Generates items for the viewport and sets lastScrollPos
    */
   fix: function() {
-    // Synchronously generate all items that are immediately or nearly visible
-    this.generate(this.visibleMultiplier);
-
-    // Asynchronously generate the other items for the displayport
     setTimeout(function() {
       this.generate(this.asyncMultiplier);
       this.lastScrollPos = this.getScrollPos();
