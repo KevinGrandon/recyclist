@@ -40,7 +40,7 @@ Recyclist.prototype = {
    * Indexed by item number, the item elements currently in the DOM.
    * @type {Array}
    */
-  domItems: [],
+  domItems: {},
 
   lastScrollPos: 0,
 
