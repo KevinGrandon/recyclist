@@ -75,11 +75,15 @@ Recyclist.prototype = {
     // to reduce the likelihood of the user seeing incomplete items.
     var displayPortMargin = multiplier * scrollPortHeight;
     var startIndex = Math.max(0,
-      Math.floor((scrollPos - displayPortMargin) / itemHeight));
+
+      /* Use ~~() for a faster equivalent to Math.floor */
+      ~~((scrollPos - displayPortMargin) / itemHeight));
 
     var endIndex = Math.min(this.numItems,
-      Math.ceil((scrollPos + scrollPortHeight + displayPortMargin) /
-        itemHeight));
+
+      /* Use ~~()+1 for a faster equivalent to Math.ceil */
+      ~~((scrollPos + scrollPortHeight + displayPortMargin) /
+        itemHeight) + 1);
 
     // indices of items which are eligible for recycling
     var recyclableItems = [];
