@@ -9,7 +9,7 @@
   "locales": {
     "en-US": {
       "name": "Recyclist Example App",
-      "description": "Recyclist example app.",
+      "description": "Recyclist example app."
     }
   },
   "default_locale": "en-US",
