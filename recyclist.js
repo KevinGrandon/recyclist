@@ -137,10 +137,8 @@ Recyclist.prototype = {
    * Generates items for the viewport and sets lastScrollPos
    */
   fix: function() {
-    setTimeout(function() {
-      this.generate(this.asyncMultiplier);
-      this.lastScrollPos = this.getScrollPos();
-    }.bind(this));
+    this.generate(this.asyncMultiplier);
+    this.lastScrollPos = this.getScrollPos();
   },
 
   handleEvent: function() {
