@@ -1,0 +1,19 @@
+{
+  "name": "Recyclist Example App",
+  "description": "Recyclist example app.",
+  "launch_path": "/index.html",
+  "developer": {
+    "name": "Kevin Grandon",
+    "url": "https://github.com/kevingrandon"
+  },
+  "locales": {
+    "en-US": {
+      "name": "Recyclist Example App",
+      "description": "Recyclist example app."
+    }
+  },
+  "default_locale": "en-US",
+  "icons": {
+    "128": "/style/icons/Blank.png"
+  }
+}
