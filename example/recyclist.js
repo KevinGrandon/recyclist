@@ -142,9 +142,9 @@ Recyclist.prototype = {
    * Calculates sizing and position information for all items.
    */
   addItems: function(numItems) {
-    var start = (this.positions.length || 0);
+    var start = Object.keys(this.positions).length;
     var i = start;
-    for (i = start; i < numItems; i++) {
+    for (i = start; i < start + numItems; i++) {
       var position;
       var isHeader = this.isHeader(i);
       var lastPosition = this.positions[i - 1];
@@ -158,8 +158,7 @@ Recyclist.prototype = {
 
       this.positions[i] = [position, isHeader];
     }
-
-    this.numItems = numItems;
+    this.numItems += numItems;
 
     this.scrollChild.style.height = this.positions[i - 1][0] + this.itemHeight + 'px';
   },

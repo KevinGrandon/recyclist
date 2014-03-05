@@ -1,0 +1,19 @@
+{
+  "name": "Recyclist Incremental Grouping",
+  "description": "Recyclist Incremental Grouping",
+  "launch_path": "/index.html",
+  "developer": {
+    "name": "Kevin Grandon",
+    "url": "https://github.com/kevingrandon"
+  },
+  "locales": {
+    "en-US": {
+      "name": "Recyclist Incremental Grouping",
+      "description": "Recyclist Incremental Grouping",
+    }
+  },
+  "default_locale": "en-US",
+  "icons": {
+    "128": "/style/icons/Blank.png"
+  }
+}
