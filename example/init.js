@@ -11,7 +11,7 @@ function populate(element, index) {
 
 var scroll = new Recyclist({
   template: document.getElementById('template'),
-  numItems: 100000,
+  numItems: 1000,
   populate: populate,
   scrollParent: window,
   scrollChild: document.getElementById('scroll'),
