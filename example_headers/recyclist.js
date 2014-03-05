@@ -28,6 +28,7 @@ function Recyclist(config) {
 
   var header = config.headerTemplate;
   if (header) {
+    this.headerHeight = header.clientHeight;
     header.parentNode.removeChild(header);
     header.removeAttribute('id');
   }
@@ -53,6 +54,13 @@ Recyclist.prototype = {
    * @type {Object}
    */
   domHeaders: {},
+
+  /**
+   * A mapping of index to item data.
+   * Each index is an array that contains the scroll position, and whether
+   * or not the item is a header. E.g., {0: [0, true], 1: [20, false]}
+   */
+  positions: {},
 
   lastScrollPos: 0,
 
@@ -169,7 +177,22 @@ Recyclist.prototype = {
         }
       }
       this.populate(item, i);
-      item.style.top = i * itemHeight + 'px';
+
+      var position;
+      var lastPosition = this.positions[i - 1];
+
+      if (lastPosition) {
+        position = lastPosition[0] +
+          (lastPosition[1] ? this.headerHeight : this.itemHeight);
+          console.log('Got last:', position, 'added: ', (lastPosition[1] ? 'h'  + this.headerHeight : this.itemHeight))
+      } else {
+        position = 0;
+      }
+      console.log('Checking last:', lastPosition, position)
+
+      this.positions[i] = [position, isHeader];
+      item.style.top = position + 'px';
+
       if (isHeader) {
         this.domHeaders[i] = item;
       } else {
