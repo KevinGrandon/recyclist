@@ -7,9 +7,6 @@ function populate(element, index) {
 
   var image = element.firstChild;
   var name = image.nextSibling;
-  if (!name) {
-    console.log('NO NAME NODE:', element.outerHTML, index, isHeader(index))
-  }
   var number = name.nextSibling;
 
   var hue = (index*1000)%360;
