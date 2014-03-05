@@ -216,7 +216,7 @@ Recyclist.prototype = {
     }
     recyclableHeaders.sort();
 
-    for (i = startIndex; i < endIndex; ++i) {
+    for (i = startIndex; i <= endIndex; ++i) {
       if (this.domItems[i] || this.domHeaders[i]) {
         continue;
       }
