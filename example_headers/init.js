@@ -4,7 +4,7 @@ function populate(element, index) {
     element.firstChild.textContent = 'This is a header: ' + index;
     return;
   }
-  
+
   var image = element.firstChild;
   var name = image.nextSibling;
   if (!name) {
@@ -19,7 +19,7 @@ function populate(element, index) {
 }
 
 function isHeader(index) {
-  if (index % 20 === 0) {
+  if (index % 6 === 0) {
     return true;
   }
   return false;

@@ -15,7 +15,14 @@ body, html {
   justify-content: space-between;
 }
 
+.header {
+	background: #ff0000;
+	color: #fff;
+	padding: 0;
+}
+
 .header h2 {
+	color: #fff;
   text-align: center;
   width: 100%;
 }
