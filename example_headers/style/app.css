@@ -1,9 +1,9 @@
 body, html {
-	padding: 0;
-	margin: 0;
-	font-size: 10px;
-	height: 100%;
-	background: #FFF;
+  padding: 0;
+  margin: 0;
+  font-size: 10px;
+  height: 100%;
+  background: #FFF;
 }
 
 .item {
@@ -16,13 +16,14 @@ body, html {
 }
 
 .header {
-	background: #ff0000;
-	color: #fff;
-	padding: 0;
+  background: #ff0000;
+  color: #fff;
+  padding: 0;
+  line-height: 0.7rem;
 }
 
 .header h2 {
-	color: #fff;
+  color: #fff;
   text-align: center;
   width: 100%;
 }

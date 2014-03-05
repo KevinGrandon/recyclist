@@ -80,6 +80,64 @@ Recyclist.prototype = {
   },
 
   /**
+   * Searches for the startIndex using a binary search.
+   * @param {Number} startPos The start of the display port.
+   */
+  searchStartIndex: function(startPos) {
+    var min = 0;
+    var max = Object.keys(this.positions).length - 1;
+    var index;
+    var current;
+    var currentHeight;
+
+    while (min <= max) {
+      index = (min + max) / 2 | 0;
+      current = this.positions[index][0];
+      currentHeight = (this.positions[index][0] ?
+        this.headerHeight : this.itemHeight);
+
+      if (current > startPos) {
+        max = index - 1;
+      } else if (current < startPos - currentHeight) {
+        min = index + 1;
+      } else {
+        return index;
+      }
+    }
+
+    return min;
+  },
+
+  /**
+   * Searches for the endIndex using a binary search.
+   * @param {Number} endPos The end of the display port.
+   */
+  searchEndIndex: function(endPos) {
+    var min = 1;
+    var max = Object.keys(this.positions).length - 1;
+    var index;
+    var current;
+    var currentHeight;
+
+    while (min <= max) {
+      index = (min + max) / 2 | 0;
+      current = this.positions[index][0];
+      currentHeight = (this.positions[index][0] ?
+        this.headerHeight : this.itemHeight);
+
+      if (current < endPos) {
+        min = index + 1;
+      } else if (current > endPos + currentHeight) {
+        max = index - 1;
+      } else {
+        return index;
+      }
+    }
+
+    return max;
+  },
+
+  /**
    * Sets the number of items in the list.
    * Calculates sizing and position information for all items.
    */
@@ -123,16 +181,6 @@ Recyclist.prototype = {
     // database queries to fill in an item), increase multiplier
     // to reduce the likelihood of the user seeing incomplete items.
     var displayPortMargin = multiplier * scrollPortHeight;
-    var origstartIndex = Math.max(0,
-
-      /* Use ~~() for a faster equivalent to Math.floor */
-      ~~((scrollPos - displayPortMargin) / itemHeight));
-
-    var origendIndex = Math.min(this.numItems,
-
-      /* Use ~~()+1 for a faster equivalent to Math.ceil */
-      ~~((scrollPos + scrollPortHeight + displayPortMargin) /
-        itemHeight) + 1);
 
     var startPosition = Math.max(0,
       (scrollPos - displayPortMargin));
@@ -140,24 +188,13 @@ Recyclist.prototype = {
     var endPosition = Math.max(0,
       (scrollPos + scrollPortHeight + displayPortMargin));
 
-    var startIndex = 0;
-    for (var startPos in this.positions) {
-      if (this.positions[startPos][0] >= (scrollPos - displayPortMargin)) {
-        startIndex = parseInt(startPos, 10);
-        break;
-      }
-    }
+    // Use a binary search to find the startIndex.
+    // The start index is the first item before our display port.
+    var startIndex = this.searchStartIndex(startPosition);
 
-    var endIndex;
-    for (var endPos in this.positions) {
-      if (this.positions[endPos][0] > (scrollPos + scrollPortHeight + displayPortMargin)) {
-        endIndex = parseInt(endPos, 10);
-        break;
-      }
-    }
-    if (!endIndex) {
-      endIndex = Object.keys(this.positions).length;
-    }
+    // Use a binary search to find the endIndex.
+    // The endIndex is the first item after our display port.
+    var endIndex = this.searchEndIndex(endPosition);
 
     // indices of items which are eligible for recycling
     var recyclableItems = [];
