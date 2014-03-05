@@ -29,7 +29,7 @@ var scroll = new Recyclist({
   template: document.getElementById('template'),
   headerTemplate: document.getElementById('header'),
   isHeader: isHeader,
-  numItems: 105000,
+  numItems: 10100,
   populate: populate,
   scrollParent: window,
   scrollChild: document.getElementById('scroll'),

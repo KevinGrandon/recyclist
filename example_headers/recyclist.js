@@ -39,6 +39,8 @@ function Recyclist(config) {
 
   this.visibleMultiplier = this.visibleMultiplier || 1;
   this.asyncMultiplier = this.asyncMultiplier || 4;
+
+  this.addItems(config.numItems);
 }
 
 Recyclist.prototype = {
@@ -68,9 +70,6 @@ Recyclist.prototype = {
    * Initializes recyclist, adds listeners, and renders items.
    */
   init: function() {
-    // Make sure we can scroll the required distance.
-    this.scrollChild.style.height = this.itemHeight * this.numItems + 'px';
-
     this.scrollParent.addEventListener('scroll', this);
     this.scrollParent.addEventListener('resize', this);
 
@@ -78,6 +77,33 @@ Recyclist.prototype = {
     this.generate(this.visibleMultiplier);
 
     this.fix();
+  },
+
+  /**
+   * Sets the number of items in the list.
+   * Calculates sizing and position information for all items.
+   */
+  addItems: function(numItems) {
+    var start = (this.positions.length || 0);
+    var i = start;
+    for (i = start; i < numItems; i++) {
+      var position;
+      var isHeader = this.isHeader(i);
+      var lastPosition = this.positions[i - 1];
+
+      if (lastPosition) {
+        position = lastPosition[0] +
+          (lastPosition[1] ? this.headerHeight : this.itemHeight);
+      } else {
+        position = 0;
+      }
+
+      this.positions[i] = [position, isHeader];
+    }
+
+    this.numItems = numItems;
+
+    this.scrollChild.style.height = this.positions[i - 1][0] + this.itemHeight + 'px';
   },
 
   /**
@@ -97,16 +123,41 @@ Recyclist.prototype = {
     // database queries to fill in an item), increase multiplier
     // to reduce the likelihood of the user seeing incomplete items.
     var displayPortMargin = multiplier * scrollPortHeight;
-    var startIndex = Math.max(0,
+    var origstartIndex = Math.max(0,
 
       /* Use ~~() for a faster equivalent to Math.floor */
       ~~((scrollPos - displayPortMargin) / itemHeight));
 
-    var endIndex = Math.min(this.numItems,
+    var origendIndex = Math.min(this.numItems,
 
       /* Use ~~()+1 for a faster equivalent to Math.ceil */
       ~~((scrollPos + scrollPortHeight + displayPortMargin) /
         itemHeight) + 1);
+
+    var startPosition = Math.max(0,
+      (scrollPos - displayPortMargin));
+
+    var endPosition = Math.max(0,
+      (scrollPos + scrollPortHeight + displayPortMargin));
+
+    var startIndex = 0;
+    for (var startPos in this.positions) {
+      if (this.positions[startPos][0] >= (scrollPos - displayPortMargin)) {
+        startIndex = parseInt(startPos, 10);
+        break;
+      }
+    }
+
+    var endIndex;
+    for (var endPos in this.positions) {
+      if (this.positions[endPos][0] > (scrollPos + scrollPortHeight + displayPortMargin)) {
+        endIndex = parseInt(endPos, 10);
+        break;
+      }
+    }
+    if (!endIndex) {
+      endIndex = Object.keys(this.positions).length;
+    }
 
     // indices of items which are eligible for recycling
     var recyclableItems = [];
@@ -177,21 +228,7 @@ Recyclist.prototype = {
         }
       }
       this.populate(item, i);
-
-      var position;
-      var lastPosition = this.positions[i - 1];
-
-      if (lastPosition) {
-        position = lastPosition[0] +
-          (lastPosition[1] ? this.headerHeight : this.itemHeight);
-          console.log('Got last:', position, 'added: ', (lastPosition[1] ? 'h'  + this.headerHeight : this.itemHeight))
-      } else {
-        position = 0;
-      }
-      console.log('Checking last:', lastPosition, position)
-
-      this.positions[i] = [position, isHeader];
-      item.style.top = position + 'px';
+      item.style.top = this.positions[i][0] + 'px';
 
       if (isHeader) {
         this.domHeaders[i] = item;
